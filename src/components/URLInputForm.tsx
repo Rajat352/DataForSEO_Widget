@@ -17,6 +17,7 @@ export default function URLInputForm() {
     router.push(`${encodeURIComponent(route)}`);
   };
 
+  // regex pattern for validating url
   function isValidUrl(url: string) {
     const pattern = new RegExp(
       "^([a-zA-Z]+:\\/\\/)?" + // protocol
