@@ -4,9 +4,20 @@ type URLType = {
   params: { url: string };
 };
 
-const login = process.env.DATAFORSEO_LOGIN;
-const pass = process.env.DATAFORSEO_PASS;
-const api_url = process.env.DATAFORSEO_URL;
+type TaskType = {
+  id: string;
+  status_code: number;
+  status_message: string;
+  time: string;
+  cost: number;
+  result_count: number;
+  path: string[];
+  data: { target: string };
+};
+
+const login = process.env.NEXT_PUBLIC_DATAFORSEO_LOGIN;
+const pass = process.env.NEXT_PUBLIC_DATAFORSEO_PASS;
+const api_url = process.env.DATAFORSEO_URL_TASK_POST;
 const base64 = btoa(`${login}:${pass}`); // encode login and pass to base64
 
 function cleanURL(url: string) {
@@ -50,5 +61,18 @@ export default async function Url({ params }: URLType) {
   const decodeUrl = decodeURIComponent(params.url);
   const url = cleanURL(decodeUrl);
   const data = await getData(url);
-  return <DisplayData data={data} />;
+  return (
+    <div className="min-h-screen text-center py-10 sm:py-20">
+      {data.status_code === 20000 ? (
+        <div className="text-4xl font-bold">
+          Results for {data.tasks[0].data.target}
+          {data.tasks.map((task: TaskType) => (
+            <DisplayData key={task.id} data={task.id} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-4xl font-bold">{data.status_message}</div>
+      )}
+    </div>
+  );
 }
