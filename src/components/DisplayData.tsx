@@ -10,6 +10,11 @@ interface DisplayDataType {
 }
 
 interface ResType {
+  result_count: number;
+  result: [ResultType];
+}
+
+interface ResultType {
   total_pages: number;
   main_domain: string;
   domain_info: {
@@ -50,7 +55,7 @@ const headers = new Headers({
 });
 
 const DisplayData: React.FC<DisplayDataType> = ({ data }) => {
-  const [res, setRes] = useState({} as ResType | null);
+  const [res, setRes] = useState({} as ResType);
   const [isLoading, setLoading] = useState(true);
   useEffect(() => {
     fetch(`${api_url}${data}`, {
@@ -59,21 +64,35 @@ const DisplayData: React.FC<DisplayDataType> = ({ data }) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        setRes(data.tasks[0].result[0]);
+        setRes(data.tasks[0]);
         setLoading(false);
       });
   }, []);
 
   if (isLoading) return <p className="text-4xl text-center">Loading...</p>;
-  if (!data) return <p className="text-4xl text-center">No profile data</p>;
+  if (!res) return <p className="text-4xl text-center">No profile data</p>;
 
   return (
     <div className="mt-10">
-      <div className="flex flex-col items-center">
-        <OnPageResultsSummary results={res.page_metrics.onpage_score} />
-        <OnPageMetrics results={res.page_metrics} />
-        <OnPageChecks results={res.domain_info.checks} />
-      </div>
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="flex flex-col items-center">
+          {res.result[0].page_metrics === null ? (
+            <div>Data not available!</div>
+          ) : (
+            <>
+              <OnPageResultsSummary
+                results={res.result[0].page_metrics.onpage_score}
+              />
+              <OnPageMetrics results={res.result[0].page_metrics} />
+            </>
+          )}
+          {res.result[0].domain_info !== null && (
+            <OnPageChecks results={res.result[0].domain_info.checks} />
+          )}
+        </div>
+      )}
     </div>
   );
 };
